@@ -52,7 +52,7 @@ TIMER_INTERUPT:
 	reti
 
 	
-INIT_PORTS:
+INIT_PORTS:				//Initierar de berörda portarna databladet förklarar.
 	sbi		DDRB, 0
 	sbi		DDRB, 1
 	sbi		DDRB, 2
@@ -66,9 +66,9 @@ START:
 	ldi		r16, LOW(RAMEND)
 	out		SPL, r16
 
-	call	INIT_PORTS
+	call	INIT_PORTS			//Måste anropas i början
 	
-	call	LCD_INIT
+	call	LCD_INIT			//Måste också anropas tidigt. Denna initierar LCDn
 	call	LCD_CLEAR
 	ldi		r16, 10
 	call	DELAY
@@ -82,7 +82,7 @@ MAIN:
 	jmp		MAIN
 	
 
-LCD_INIT:
+LCD_INIT:					//Denna rutin är väldigt viktigt! Den kräver samtliga av de nedan nämnda rutinerna. 
 	call	BACKLIGHT_OFF
 	call	DELAY
 	call	BACKLIGHT_ON
@@ -156,12 +156,12 @@ LCD_HOME:
 	ret
 
 
-INIT_TIME:
-	ldi		ZH, HIGH(TIME)
+INIT_TIME:					//Denna initierar tiden vid starten
+	ldi		ZH, HIGH(TIME)		//Z-Pekaren pekar på TIME delen i minnet
 	ldi		ZL, LOW(TIME)
 
 	
-	ldi		r16, 7		
+	ldi		r16, 7			x
 	std		Z+0, r16
 	ldi		r16, 5
 	std		Z+1, r16
@@ -206,6 +206,7 @@ TIME_LOOP:
 	cpi		r18, 2			//Check if ten-hour digit is 2 aka 20:00
 	brne	COMPARE_MAX
 	ldi		r17, 3			//Change one-hour digit max value to 3 aka 23:XX is the latest possible
+	
 COMPARE_MAX:
 	cp		r16, r17		//Compare digit with max value
 	breq	OVERFLOW
@@ -267,7 +268,7 @@ TIME_FORMAT:
 	std		Y+8, r16
 	ret
 
-WAIT:
+WAIT:					//Min WAIT-loop går att kopierar rakt av i samtliga program som använder LCD
 	adiw	r24,1
 	brne	WAIT
 	ret
